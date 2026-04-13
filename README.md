@@ -11,8 +11,8 @@ Visualización en mapa interactivo
 
 
 ## **Ejecución:**
-pip install flask googlemaps polyline\
-python app.py
+- pip install flask googlemaps polyline\
+- python app.py
 
 ## **Abrir en navegador:**
 http://127.0.0.1:5000/\
