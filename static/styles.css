@@ -1,0 +1,68 @@
+body {
+    font-family: Arial;
+    text-align: center;
+}
+
+/* 🔥 CONTENEDOR PRINCIPAL */
+.contenedor {
+    display: flex;
+    margin-top: 20px;
+}
+
+/* 📍 MAPA */
+#map {
+    height: 500px;
+    width: 75%;
+    margin-top: 20px;
+}
+
+/* 📊 PANEL LATERAL */
+.panel {
+    width: 25%;
+    padding: 15px;
+    background: #f9f9f9;
+    border-left: 2px solid #ccc;
+    height: 500px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+/* 🔹 LISTA */
+.panel ul {
+    padding-left: 15px;
+}
+
+/* 🧠 PASOS (SCROLL) */
+.pasos {
+    max-height: 250px;
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+/* 📏 ETIQUETAS EN EL MAPA */
+.label-distancia div {
+    background: linear-gradient(135deg, #ffffff, #f0f0f0);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #222;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    min-width: 60px;
+
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+    border: 1px solid #ddd;
+}
+.panel h3 {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+}
+
+.panel li {
+    margin-bottom: 8px;
+}

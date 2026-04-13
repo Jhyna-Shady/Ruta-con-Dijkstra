@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ruta más corta Perú</title>
+
+    <!-- CSS propio -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-polylinedecorator"></script>
+</head>
+
+<body>
+
+<h2>Ruta más corta con Dijkstra + Google Maps</h2>
+
+<form method="POST">
+    <select name="origen">
+        {% for d in departamentos %}
+        <option value="{{d}}">{{d}}</option>
+        {% endfor %}
+    </select>
+
+    <select name="destino">
+        {% for d in departamentos %}
+        <option value="{{d}}">{{d}}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Calcular</button>
+</form>
+
+<p><b>Ruta:</b> {{ ruta }}</p>
+<p><b>Distancia total:</b> {{ distancia }} km</p>
+
+<!-- 🔥 CONTENEDOR PRINCIPAL -->
+<div class="contenedor">
+
+    <!-- 📍 MAPA -->
+    <div id="map"></div>
+
+    <!-- 📊 PANEL LATERAL -->
+    <div class="panel">
+
+        <h3>Tramos</h3>
+        <ul>
+        {% for t in tramos %}
+        <li>
+            <b>{{ t.origen }} → {{ t.destino }}</b><br>
+            {{ t.distancia }} km | {{ t.tiempo }} h
+        </li>
+        {% endfor %}
+        </ul>
+
+        <h3>Pasos del algoritmo</h3>
+        <div class="pasos">
+        {% for p in pasos %}
+        <p>{{ p }}</p>
+        {% endfor %}
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 🔥 MAPA SCRIPT -->
+<script>
+var map = L.map('map').setView([-9.19, -75.015], 5);
+
+// mapa base
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// datos desde Flask
+var ruta = {{ coords | tojson }};
+var tramos = {{ tramos | tojson }};
+
+if (ruta && ruta.length > 1) {
+
+    var latlngs = ruta.map(p => [p[0], p[1]]);
+
+    // 📍 inicio y fin
+    L.marker(latlngs[0]).addTo(map).bindPopup("Inicio");
+    L.marker(latlngs[latlngs.length - 1]).addTo(map).bindPopup("Destino");
+
+    // 🔥 DIBUJAR TRAMOS
+    for (let i = 0; i < tramos.length; i++) {
+        let tramoCoords = tramos[i].coords.map(p => [p[0], p[1]]);
+        if (!tramoCoords.length) continue;
+
+        let distancia = tramos[i].distancia;
+        let tiempo = tramos[i].tiempo;
+
+        // 🎨 color por distancia
+        let color = distancia < 300 ? "green" :
+                    distancia < 700 ? "orange" : "red";
+
+        let linea = L.polyline(tramoCoords, {
+            color: color,
+            weight: 6
+        }).addTo(map);
+
+        // popup
+        linea.bindPopup(`
+            ${tramos[i].origen} → ${tramos[i].destino}<br>
+            ${distancia} km | ${tiempo} h
+        `);
+
+        // 📏 etiqueta al centro del tramo
+        let midIndex = Math.floor(tramoCoords.length / 2);
+        let midLat = tramoCoords[midIndex][0];
+        let midLng = tramoCoords[midIndex][1];
+
+        L.marker([midLat, midLng], {
+            icon: L.divIcon({
+                className: 'label-distancia',
+                html: `<div>${distancia} km</div>`
+            })
+        }).addTo(map);
+
+        // ➡️ flecha
+        L.polylineDecorator(linea, {
+            patterns: [{
+                offset: '50%',
+                repeat: 0,
+                symbol: L.Symbol.arrowHead({
+                    pixelSize: 15,
+                    pathOptions: { color: color }
+                })
+            }]
+        }).addTo(map);
+    }
+
+    // ajustar vista
+    var grupo = new L.featureGroup(latlngs.map(p => L.marker(p)));
+    map.fitBounds(grupo.getBounds());
+}
+</script>
+
+</body>
+</html>
